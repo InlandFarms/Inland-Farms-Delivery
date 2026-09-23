@@ -1,8 +1,26 @@
-import React, { useState } from 'react';
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://ohznzuabosygqaevvpuu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+)
+
+import React, { useState, useEffect } from 'react'  // ← original line 1
+// rest of your code continues...import React, { useState } from 'react';
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
 
 const InlandFarmsDelivery = () => {
-  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
+
+useEffect(() => {
+  async function fetchProducts() {
+    const { data, error } = await supabase
+      .from('Products')
+      .select('*')
+    if (data) setProducts(data)
+  }
+  fetchProducts()
+}, [])  const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [favorites, setFavorites] = useState([]);
