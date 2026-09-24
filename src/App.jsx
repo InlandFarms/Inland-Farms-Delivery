@@ -20,7 +20,8 @@ useEffect(() => {
     if (data) setProducts(data)
   }
   fetchProducts()
-}, [])  const [cart, setCart] = useState([]);
+}, [])  
+  const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [favorites, setFavorites] = useState([]);
