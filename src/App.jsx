@@ -1,57 +1,49 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  'https://ohznzuabosygqaevvpuu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-)
-
-import React, { useState, useEffect } from 'react'  // ← original line 1
-
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
 
 const InlandFarmsDelivery = () => {
-  const [products, setProducts] = useState([]);
-
-useEffect(() => {
-  async function fetchProducts() {
-    const { data, error } = await supabase
-      .from('Products')
-      .select('*')
-    if (data) setProducts(data)
-  }
-  fetchProducts()
-}, [])  
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [favorites, setFavorites] = useState([]);
-
-  const categories = [
-    { id: 'flower', name: 'Flower', description: 'Estate-grown cultivars' },
-    { id: 'concentrates', name: 'Concentrates', description: 'Refined extractions' },
-    { id: 'curated', name: 'Limited Release', description: 'Limited estate release', badge: 'Limited' }
-  ];
-
- 
-
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  useEffect(() => {
+    // In production this fetches from Supabase
+    // Showing demo products here for preview only
+    setProducts([
+      { id: 1, name: 'Onyx', category: 'flower', type: 'Indica', thc: '20%', price: 50, weight: '7g', story: 'Deep, dark, and mysterious. A potent indica with notes of earth and sweet berries.', effects: 'Relaxed, Euphoric, Sleepy' },
+      { id: 2, name: 'Purple Tier', category: 'flower', type: 'Indica Hybrid', thc: '23%', price: 50, weight: '7g', story: 'Regal and refined. Deep purple hues with a sweet grape and floral profile.', effects: 'Calm, Happy, Peaceful' },
+      { id: 3, name: 'Black Ink', category: 'flower', type: 'Indica', thc: '25%', price: 50, weight: '7g', story: 'Bold and potent. Rich, dark flavors of coffee and chocolate.', effects: 'Deeply Relaxed, Sedated, Blissful' },
+      { id: 4, name: 'Inland Vault', category: 'flower', type: 'Indica', thc: '28%', price: 50, weight: '7g', story: 'Our most prized cultivation. Reserved for connoisseurs.', effects: 'Powerful, Tranquil, Euphoric' },
+      { id: 5, name: 'Rainbow Runtz', category: 'flower', type: 'Hybrid', thc: '25%', price: 50, weight: '7g', story: 'A vibrant hybrid celebrating color and flavor.', effects: 'Happy, Creative, Balanced' },
+      { id: 6, name: 'Diamond Sauce', category: 'concentrates', type: 'Sativa', thc: '70%+', price: 20, weight: '1g', story: 'Pure terpene preservation at its finest.', effects: 'Potent, Clear, Energizing' },
+      { id: 7, name: 'Onyx', category: 'live-rosin', type: 'Indica', thc: '85%+', price: 30, weight: '2g disposable', story: 'Solventless perfection in pure potent form.', effects: 'Intensely Relaxed, Euphoric' },
+      { id: 8, name: 'Rainbow Runtz Gummies', category: 'edibles', type: 'Hybrid', thc: '100mg total', price: 25, weight: '10-pack', story: 'Mixed berry bliss in precision-dosed form.', effects: 'Happy, Relaxed, Uplifted' },
+    ])
+  }, [])
+
+  const categories = [
+    { id: 'flower', name: 'Flower', description: 'Humboldt Grown' },
+    { id: 'live-rosin', name: 'Live Rosin', description: 'Solventless extractions' },
+    { id: 'concentrates', name: 'Concentrates', description: 'Refined extractions' },
+    { id: 'pre-rolls', name: 'Pre-Rolls', description: 'Infused five-packs' },
+    { id: 'edibles', name: 'Edibles', description: 'Precision-dosed gummies' }
+  ];
+
   const toggleFavorite = (productId) => {
-    setFavorites(prev => 
-      prev.includes(productId) 
+    setFavorites(prev =>
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
   };
 
-  const reorderProduct = (product) => {
-    addToCart(product);
-  };
-
   const addToCart = (product) => {
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
-      setCart(cart.map(item => 
+      setCart(cart.map(item =>
         item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
       ));
     } else {
@@ -77,7 +69,7 @@ useEffect(() => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const filteredProducts = selectedCategory 
+  const filteredProducts = selectedCategory
     ? products.filter(p => p.category === selectedCategory)
     : [];
 
@@ -95,7 +87,7 @@ useEffect(() => {
               </div>
             </button>
 
-            <button 
+            <button
               onClick={() => setShowCart(!showCart)}
               className="relative border border-neutral-800 bg-neutral-900 text-neutral-100 px-6 py-3 text-sm tracking-wider hover:bg-neutral-800 transition-colors duration-500"
             >
@@ -133,7 +125,7 @@ useEffect(() => {
                 {favoriteProducts.map(product => (
                   <button
                     key={product.id}
-                    onClick={() => reorderProduct(product)}
+                    onClick={() => addToCart(product)}
                     className="border border-neutral-900 p-6 text-left hover:border-neutral-700 transition-all duration-500 group"
                   >
                     <div className="flex items-start justify-between mb-4">
@@ -151,20 +143,15 @@ useEffect(() => {
           )}
 
           {/* Category Selection */}
-          <div className="max-w-5xl mx-auto mt-32 grid md:grid-cols-3 gap-8">
+          <div className="max-w-6xl mx-auto mt-32 grid md:grid-cols-3 lg:grid-cols-5 gap-6">
             {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className="group border border-neutral-900 p-12 hover:border-neutral-700 transition-all duration-500 text-left relative"
+                className="group border border-neutral-900 p-10 hover:border-neutral-700 transition-all duration-500 text-left relative"
               >
-                {cat.badge && (
-                  <span className="absolute top-4 right-4 text-xs tracking-wider text-neutral-700 font-light">
-                    {cat.badge}
-                  </span>
-                )}
-                <h3 className="text-2xl font-serif text-neutral-100 mb-4">{cat.name}</h3>
-                <p className="text-sm text-neutral-600 mb-8 font-light tracking-wide">{cat.description}</p>
+                <h3 className="text-xl font-serif text-neutral-100 mb-4">{cat.name}</h3>
+                <p className="text-xs text-neutral-600 mb-8 font-light tracking-wide">{cat.description}</p>
                 <div className="flex items-center text-neutral-500 group-hover:text-neutral-300 transition-colors">
                   <span className="text-xs tracking-widest uppercase">View Selection</span>
                 </div>
@@ -185,32 +172,29 @@ useEffect(() => {
               ← Back
             </button>
 
-            <div className="grid md:grid-cols-2 gap-16">
+            {products.length === 0 && (
+              <p className="text-neutral-500 text-center py-20">Loading products...</p>
+            )}
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
               {filteredProducts.map(product => (
                 <button
                   key={product.id}
                   onClick={() => setSelectedProduct(product)}
                   className="group text-left border-b border-neutral-900 pb-8 hover:border-neutral-700 transition-all duration-500"
                 >
-                  <div className="bg-neutral-900 h-96 mb-8 flex items-center justify-center relative">
+                  <div className="bg-neutral-900 h-80 mb-6 flex items-center justify-center relative">
                     <div className="w-32 h-32 border border-neutral-800 flex items-center justify-center">
                       <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
                       </svg>
                     </div>
-                    {product.farmDirect && (
-                      <span className="absolute top-4 left-4 text-xs tracking-widest uppercase text-neutral-600 border border-neutral-800 px-3 py-1 bg-neutral-950">
-                        From Our Farm
-                      </span>
-                    )}
-                    {product.limited && (
-                      <span className="absolute top-4 right-4 text-xs tracking-widest uppercase text-neutral-400 border border-neutral-700 px-3 py-1 bg-neutral-950">
-                        {product.remaining} Remaining
-                      </span>
-                    )}
+                    <span className="absolute top-4 left-4 text-xs tracking-wider text-neutral-700 font-light">
+                      From Our Farm
+                    </span>
                   </div>
-                  <h3 className="text-2xl font-serif text-neutral-100 mb-4">{product.name}</h3>
-                  <p className="text-neutral-500 text-sm mb-6 font-light leading-relaxed">{product.story}</p>
+                  <h3 className="text-xl font-serif text-neutral-100 mb-3">{product.name}</h3>
+                  <p className="text-neutral-600 text-xs mb-4">{product.type}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl text-neutral-100 font-light">${product.price}</span>
                     <span className="text-neutral-600 text-xs tracking-widest uppercase">View Details</span>
@@ -240,27 +224,28 @@ useEffect(() => {
                     <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
                   </svg>
                 </div>
-                {selectedProduct.farmDirect && (
-                  <span className="absolute top-6 left-6 text-xs tracking-widest uppercase text-neutral-600 border border-neutral-800 px-4 py-2 bg-neutral-950">
-                    From Our Farm
-                  </span>
-                )}
+                <span className="absolute top-6 left-6 text-xs tracking-wider text-neutral-700 font-light">
+                  From Our Farm
+                </span>
               </div>
 
               <div>
                 <div className="flex items-start justify-between mb-8">
-                  <h1 className="text-4xl font-serif text-neutral-100">{selectedProduct.name}</h1>
+                  <div>
+                    <h1 className="text-4xl font-serif text-neutral-100 mb-2">{selectedProduct.name}</h1>
+                    <p className="text-neutral-600 text-sm">{selectedProduct.type}</p>
+                  </div>
                   <button
                     onClick={() => toggleFavorite(selectedProduct.id)}
                     className="text-neutral-600 hover:text-neutral-400 transition-colors"
                   >
-                    <Heart 
-                      className="w-6 h-6" 
+                    <Heart
+                      className="w-6 h-6"
                       fill={favorites.includes(selectedProduct.id) ? "currentColor" : "none"}
                     />
                   </button>
                 </div>
-                
+
                 <div className="mb-12 pb-8 border-b border-neutral-900">
                   <h3 className="text-xs tracking-widest uppercase text-neutral-600 mb-4">Story</h3>
                   <p className="text-neutral-400 leading-relaxed font-light">{selectedProduct.story}</p>
@@ -272,7 +257,7 @@ useEffect(() => {
                 </div>
 
                 <div className="mb-12 pb-8 border-b border-neutral-900">
-                  <h3 className="text-xs tracking-widest uppercase text-neutral-600 mb-2">THC Content</h3>
+                  <h3 className="text-xs tracking-widest uppercase text-neutral-600 mb-2">THC</h3>
                   <p className="text-neutral-500 text-sm font-light">{selectedProduct.thc}</p>
                 </div>
 
@@ -289,11 +274,9 @@ useEffect(() => {
                   </button>
                 </div>
 
-                {selectedProduct.limited && (
-                  <p className="text-xs text-neutral-600 tracking-wide">
-                    Limited release · Only {selectedProduct.remaining} units remaining
-                  </p>
-                )}
+                <p className="text-xs text-neutral-700 tracking-wide">
+                  Limited release · From our farm
+                </p>
               </div>
             </div>
           </div>
@@ -303,7 +286,7 @@ useEffect(() => {
       {/* Cart Sidebar */}
       {showCart && (
         <div className="fixed inset-0 bg-black/90 z-50" onClick={() => setShowCart(false)}>
-          <div 
+          <div
             className="absolute right-0 top-0 h-full w-full max-w-lg bg-neutral-950 border-l border-neutral-900 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
