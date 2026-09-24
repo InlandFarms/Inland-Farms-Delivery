@@ -6,7 +6,7 @@ const supabase = createClient(
 )
 
 import React, { useState, useEffect } from 'react'  // ← original line 1
-// rest of your code continues...import React, { useState } from 'react';
+
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
 
 const InlandFarmsDelivery = () => {
@@ -32,65 +32,7 @@ useEffect(() => {
     { id: 'curated', name: 'Limited Release', description: 'Limited estate release', badge: 'Limited' }
   ];
 
-  const products = [
-    { 
-      id: 1, 
-      name: 'Blue Dream', 
-      category: 'flower', 
-      story: 'A balanced hybrid born in California, known for its gentle euphoria and creative energy.',
-      effects: 'Uplifting, Creative, Focused',
-      thc: '22%', 
-      price: 45, 
-      weight: '3.5g',
-      farmDirect: true
-    },
-    { 
-      id: 2, 
-      name: 'OG Kush', 
-      category: 'flower', 
-      story: 'The legendary strain that defined West Coast cannabis culture. Deep relaxation with clarity.',
-      effects: 'Relaxed, Euphoric, Happy',
-      thc: '24%', 
-      price: 50, 
-      weight: '3.5g',
-      farmDirect: true
-    },
-    { 
-      id: 3, 
-      name: 'Gelato', 
-      category: 'flower', 
-      story: 'Italian heritage meets California craft. Sweet, balanced, and undeniably smooth.',
-      effects: 'Balanced, Calm, Uplifted',
-      thc: '20%', 
-      price: 48, 
-      weight: '3.5g',
-      farmDirect: false
-    },
-    { 
-      id: 4, 
-      name: 'Diamond Sauce', 
-      category: 'concentrates', 
-      story: 'Live resin crystallization at its finest. Pure terpene preservation.',
-      effects: 'Potent, Clear, Energizing',
-      thc: '88%', 
-      price: 65, 
-      weight: '1g',
-      farmDirect: true
-    },
-    { 
-      id: 5, 
-      name: 'Purple Sunset', 
-      category: 'curated', 
-      story: 'This week\'s limited harvest. A rare phenotype with deep purple hues and notes of lavender and earth. Only 12 units available.',
-      effects: 'Deeply Relaxing, Dreamy, Peaceful',
-      thc: '26%', 
-      price: 75, 
-      weight: '3.5g',
-      farmDirect: true,
-      limited: true,
-      remaining: 8
-    }
-  ];
+ 
 
   const [selectedProduct, setSelectedProduct] = useState(null);
 
