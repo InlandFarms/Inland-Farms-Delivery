@@ -1,5 +1,11 @@
+import { createClient } from '@supabase/supabase-js'
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
+
+const supabase = createClient(
+  'https://ohznzuabosygqaevvpuu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oem56dWFib3N5Z3FhZXZ2cHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4ODk1MDQsImV4cCI6MjA4NTQ2NTUwNH0.yhCqZ9o6v9zW-wclLZibUO0Abn4_kcIKr6ZrgjeO32o'
+)
 
 const InlandFarmsDelivery = () => {
   const [cart, setCart] = useState([]);
@@ -10,18 +16,14 @@ const InlandFarmsDelivery = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
-    // In production this fetches from Supabase
-    // Showing demo products here for preview only
-    setProducts([
-      { id: 1, name: 'Onyx', category: 'flower', type: 'Indica', thc: '20%', price: 50, weight: '7g', story: 'Deep, dark, and mysterious. A potent indica with notes of earth and sweet berries.', effects: 'Relaxed, Euphoric, Sleepy' },
-      { id: 2, name: 'Purple Tier', category: 'flower', type: 'Indica Hybrid', thc: '23%', price: 50, weight: '7g', story: 'Regal and refined. Deep purple hues with a sweet grape and floral profile.', effects: 'Calm, Happy, Peaceful' },
-      { id: 3, name: 'Black Ink', category: 'flower', type: 'Indica', thc: '25%', price: 50, weight: '7g', story: 'Bold and potent. Rich, dark flavors of coffee and chocolate.', effects: 'Deeply Relaxed, Sedated, Blissful' },
-      { id: 4, name: 'Inland Vault', category: 'flower', type: 'Indica', thc: '28%', price: 50, weight: '7g', story: 'Our most prized cultivation. Reserved for connoisseurs.', effects: 'Powerful, Tranquil, Euphoric' },
-      { id: 5, name: 'Rainbow Runtz', category: 'flower', type: 'Hybrid', thc: '25%', price: 50, weight: '7g', story: 'A vibrant hybrid celebrating color and flavor.', effects: 'Happy, Creative, Balanced' },
-      { id: 6, name: 'Diamond Sauce', category: 'concentrates', type: 'Sativa', thc: '70%+', price: 20, weight: '1g', story: 'Pure terpene preservation at its finest.', effects: 'Potent, Clear, Energizing' },
-      { id: 7, name: 'Onyx', category: 'live-rosin', type: 'Indica', thc: '85%+', price: 30, weight: '2g disposable', story: 'Solventless perfection in pure potent form.', effects: 'Intensely Relaxed, Euphoric' },
-      { id: 8, name: 'Rainbow Runtz Gummies', category: 'edibles', type: 'Hybrid', thc: '100mg total', price: 25, weight: '10-pack', story: 'Mixed berry bliss in precision-dosed form.', effects: 'Happy, Relaxed, Uplifted' },
-    ])
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from('Products')
+        .select('*')
+      if (data) setProducts(data)
+      if (error) console.error('Error fetching products:', error)
+    }
+    fetchProducts()
   }, [])
 
   const categories = [
@@ -172,7 +174,7 @@ const InlandFarmsDelivery = () => {
               ← Back
             </button>
 
-            {products.length === 0 && (
+            {filteredProducts.length === 0 && (
               <p className="text-neutral-500 text-center py-20">Loading products...</p>
             )}
 
