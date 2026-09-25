@@ -1,8 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
 
-const supabase = createClient(
+const supabase = window.supabase.createClient(
   'https://ohznzuabosygqaevvpuu.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oem56dWFib3N5Z3FhZXZ2cHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4ODk1MDQsImV4cCI6MjA4NTQ2NTUwNH0.yhCqZ9o6v9zW-wclLZibUO0Abn4_kcIKr6ZrgjeO32o'
 )
