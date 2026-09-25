@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   root: '.',
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      external: []
+    }
+  },
+  optimizeDeps: {
+    include: ['@supabase/supabase-js']
   }
 })
