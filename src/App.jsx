@@ -1,11 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, X, Heart, RotateCcw } from 'lucide-react';
 
-const supabase = window.supabase.createClient(
-  'https://ohznzuabosygqaevvpuu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oem56dWFib3N5Z3FhZXZ2cHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4ODk1MDQsImV4cCI6MjA4NTQ2NTUwNH0.yhCqZ9o6v9zW-wclLZibUO0Abn4_kcIKr6ZrgjeO32o'
-)
+const SUPABASE_URL = 'https://ohznzuabosygqaevvpuu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oem56dWFib3N5Z3FhZXZ2cHV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4ODk1MDQsImV4cCI6MjA4NTQ2NTUwNH0.yhCqZ9o6v9zW-wclLZibUO0Abn4_kcIKr6ZrgjeO32o';
 
 const InlandFarmsDelivery = () => {
   const [cart, setCart] = useState([]);
@@ -17,14 +14,25 @@ const InlandFarmsDelivery = () => {
 
   useEffect(() => {
     async function fetchProducts() {
-      const { data, error } = await supabase
-        .from('Products')
-        .select('*')
-      if (data) setProducts(data)
-      if (error) console.error('Error fetching products:', error)
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/products?select=*&limit=100`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        const data = await response.json();
+        if (Array.isArray(data)) setProducts(data);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
     }
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []);
 
   const categories = [
     { id: 'flower', name: 'Flower', description: 'Humboldt Grown' },
@@ -119,7 +127,6 @@ const InlandFarmsDelivery = () => {
             </p>
           </div>
 
-          {/* Favorites Quick Reorder */}
           {favoriteProducts.length > 0 && (
             <div className="max-w-5xl mx-auto mt-24 border-t border-neutral-900 pt-16">
               <h2 className="text-xs tracking-widest uppercase text-neutral-600 mb-8">Your Favorites</h2>
@@ -144,7 +151,6 @@ const InlandFarmsDelivery = () => {
             </div>
           )}
 
-          {/* Category Selection */}
           <div className="max-w-6xl mx-auto mt-32 grid md:grid-cols-3 lg:grid-cols-5 gap-6">
             {categories.map(cat => (
               <button
@@ -314,28 +320,15 @@ const InlandFarmsDelivery = () => {
                             <h4 className="text-neutral-100 font-light mb-2">{item.name}</h4>
                             <p className="text-sm text-neutral-600">{item.weight}</p>
                           </div>
-                          <button
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-neutral-700 hover:text-neutral-500"
-                          >
+                          <button onClick={() => removeFromCart(item.id)} className="text-neutral-700 hover:text-neutral-500">
                             <X className="w-4 h-4" />
                           </button>
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center space-x-4">
-                            <button
-                              onClick={() => updateQuantity(item.id, -1)}
-                              className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400"
-                            >
-                              −
-                            </button>
+                            <button onClick={() => updateQuantity(item.id, -1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">−</button>
                             <span className="text-neutral-300 font-light">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.id, 1)}
-                              className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400"
-                            >
-                              +
-                            </button>
+                            <button onClick={() => updateQuantity(item.id, 1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">+</button>
                           </div>
                           <span className="text-neutral-100 font-light">${(item.price * item.quantity).toFixed(2)}</span>
                         </div>
@@ -355,16 +348,12 @@ const InlandFarmsDelivery = () => {
                     <p className="text-xs text-neutral-700 mb-8">Discreet. Unbranded. Farm-direct.</p>
                     <div className="flex justify-between text-xl pt-8 border-t border-neutral-900">
                       <span className="text-neutral-100 font-light">Total</span>
-                      <span className="text-neutral-100 font-light">
-                        ${(cartTotal + (cartTotal >= 50 ? 0 : 5)).toFixed(2)}
-                      </span>
+                      <span className="text-neutral-100 font-light">${(cartTotal + (cartTotal >= 50 ? 0 : 5)).toFixed(2)}</span>
                     </div>
                   </div>
 
                   <div className="mb-8">
-                    <label className="text-xs tracking-widest uppercase text-neutral-600 mb-3 block">
-                      Delivery Window
-                    </label>
+                    <label className="text-xs tracking-widest uppercase text-neutral-600 mb-3 block">Delivery Window</label>
                     <select className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 px-4 py-3 text-sm focus:outline-none focus:border-neutral-700">
                       <option>Today, 2PM - 4PM</option>
                       <option>Today, 4PM - 6PM</option>
@@ -383,14 +372,9 @@ const InlandFarmsDelivery = () => {
         </div>
       )}
 
-      {/* Footer */}
       <footer className="border-t border-neutral-900 py-8 text-center mt-32">
-        <p className="text-xs text-neutral-700 tracking-widest uppercase font-light mb-2">
-          Must be 21+
-        </p>
-        <p className="text-xs text-neutral-800 font-light">
-          Discreet. Unbranded. Farm-direct.
-        </p>
+        <p className="text-xs text-neutral-700 tracking-widest uppercase font-light mb-2">Must be 21+</p>
+        <p className="text-xs text-neutral-800 font-light">Discreet. Unbranded. Farm-direct.</p>
       </footer>
     </div>
   );
