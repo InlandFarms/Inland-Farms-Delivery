@@ -24,7 +24,7 @@ const InlandFarmsDelivery = () => {
       if (error) console.error('Error fetching products:', error)
     }
     fetchProducts()
-  }, [])
+  }, []);
 
   const categories = [
     { id: 'flower', name: 'Flower', description: 'Humboldt Grown' },
