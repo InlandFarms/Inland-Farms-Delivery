@@ -5,31 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inland Farms Delivery</title>
     <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       #splash {
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
         background: black;
         z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: opacity 1s ease;
+        overflow: hidden;
+        transition: opacity 1.5s ease;
       }
-      #splash iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
+      #splash video {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        min-width: 100%;
+        min-height: 100%;
+        object-fit: cover;
       }
       #root { display: none; }
     </style>
   </head>
   <body>
     <div id="splash">
-      <iframe
-        src="https://www.youtube.com/embed/41nsLrkCn70?autoplay=1&mute=1&controls=0&loop=0&rel=0&showinfo=0"
-        allow="autoplay"
-      ></iframe>
+      <video autoplay muted playsinline>
+        <source src="https://res.cloudinary.com/iwoi7ut5/video/upload/Inland-Splash_Screen.mp4" type="video/mp4" />
+      </video>
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
@@ -41,8 +42,8 @@
         setTimeout(() => {
           splash.style.display = 'none';
           root.style.display = 'block';
-        }, 1000);
-      }, 16000);
+        }, 1500);
+      }, 15000);
     </script>
   </body>
 </html>
