@@ -193,12 +193,14 @@ const InlandFarmsDelivery = () => {
                   className="group text-left border-b border-neutral-900 pb-8 hover:border-neutral-700 transition-all duration-500"
                 >
                   <div className="bg-neutral-900 h-80 mb-6 flex items-center justify-center relative">
-                    <div className="w-32 h-32 border border-neutral-800 flex items-center justify-center">
-                      <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
-                      </svg>
-                    </div>
-                    <span className="absolute top-4 left-4 text-xs tracking-wider text-neutral-700 font-light">
+                   <div className="w-full h-full overflow-hidden">
+  {product.image_url 
+    ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+    : <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
+      </svg>
+  }
+</div>                    <span className="absolute top-4 left-4 text-xs tracking-wider text-neutral-700 font-light">
                       From Our Farm
                     </span>
                   </div>
