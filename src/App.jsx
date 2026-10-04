@@ -195,7 +195,7 @@ const InlandFarmsDelivery = () => {
                   <div className="bg-neutral-900 h-80 mb-6 flex items-center justify-center relative">
                    <div className="w-full h-full overflow-hidden">
   {product.image_url 
-    ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+    ? <img src={product.image_url} alt={product.name}className="w-full h-full object-cover object-center"/>
     : <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
       </svg>
