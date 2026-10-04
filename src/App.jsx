@@ -230,12 +230,14 @@ const InlandFarmsDelivery = () => {
 
             <div className="grid md:grid-cols-2 gap-20">
               <div className="bg-neutral-900 h-[600px] flex items-center justify-center relative">
-                <div className="w-48 h-48 border border-neutral-800 flex items-center justify-center">
-                  <svg className="w-32 h-32 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
-                  </svg>
-                </div>
-                <span className="absolute top-6 left-6 text-xs tracking-wider text-neutral-700 font-light">
+                <div className="w-full h-full overflow-hidden">
+  {selectedProduct.image_url
+    ? <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover object-center" />
+    : <svg className="w-32 h-32 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
+      </svg>
+  }
+</div>                <span className="absolute top-6 left-6 text-xs tracking-wider text-neutral-700 font-light">
                   From Our Farm
                 </span>
               </div>
