@@ -200,12 +200,7 @@ const InlandFarmsDelivery = () => {
         <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
       </svg>
   }
-</div>                    <span className="absolute top-4 left-4 text-xs tracking-wider text-white font-light bg-black/40 px-2 py-1">
-  From Our Farm
-</span>                      From Our Farm
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-serif text-neutral-100 mb-3">{product.name}</h3>
+<span className="absolute top-4 left-4 text-xs tracking-wider text-white font-light bg-black/40 px-2 py-1">From Our Farm</span>                  <h3 className="text-xl font-serif text-neutral-100 mb-3">{product.name}</h3>
                   <p className="text-neutral-600 text-xs mb-4">{product.type}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl text-neutral-100 font-light">${product.price}</span>
