@@ -238,11 +238,10 @@ const InlandFarmsDelivery = () => {
         <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
       </svg>
   }
-</div>                <span className="absolute top-4 left-4 text-xs tracking-wider text-white font-light bg-black/40 px-2 py-1">
+</div>
+<span className="absolute top-6 left-6 text-xs tracking-wider text-neutral-700 font-light">
   From Our Farm
-</span>                  From Our Farm
-                </span>
-              </div>
+</span>              </div>
 
               <div>
                 <div className="flex items-start justify-between mb-8">
