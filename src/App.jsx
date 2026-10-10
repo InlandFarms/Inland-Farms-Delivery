@@ -11,8 +11,17 @@ const InlandFarmsDelivery = () => {
   const [favorites, setFavorites] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [orderComplete, setOrderComplete] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [deliveryWindow, setDeliveryWindow] = useState('Today, 2PM - 4PM');
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    ageVerified: false
+  });
 
-  
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -79,12 +88,66 @@ const InlandFarmsDelivery = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const deliveryFee = cartTotal >= 50 ? 0 : 5;
+  const orderTotal = cartTotal + deliveryFee;
 
   const filteredProducts = selectedCategory
     ? products.filter(p => p.category === selectedCategory)
     : [];
 
   const favoriteProducts = products.filter(p => favorites.includes(p.id));
+
+  const submitOrder = async () => {
+    if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
+      alert('Please fill in all fields.');
+      return;
+    }
+    if (!customerInfo.ageVerified) {
+      alert('You must confirm you are 21 or older.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const orderItems = cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        weight: item.weight
+      }));
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          customer_name: customerInfo.name,
+          customer_phone: customerInfo.phone,
+          delivery_address: customerInfo.address,
+          delivery_window: deliveryWindow,
+          items: orderItems,
+          total: orderTotal,
+          age_verified: customerInfo.ageVerified,
+          status: 'pending'
+        })
+      });
+      if (response.ok || response.status === 201) {
+        setOrderComplete(true);
+        setCart([]);
+        setShowCheckout(false);
+        setCustomerInfo({ name: '', phone: '', address: '', ageVerified: false });
+      } else {
+        alert('There was an issue placing your order. Please try again.');
+      }
+    } catch (error) {
+      console.error('Order error:', error);
+      alert('There was an issue placing your order. Please try again.');
+    }
+    setSubmitting(false);
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950">
@@ -97,9 +160,8 @@ const InlandFarmsDelivery = () => {
                 INLAND FARMS
               </div>
             </button>
-
             <button
-              onClick={() => setShowCart(!showCart)}
+              onClick={() => { setShowCart(!showCart); setShowCheckout(false); setOrderComplete(false); }}
               className="relative border border-neutral-800 bg-neutral-900 text-neutral-100 px-6 py-3 text-sm tracking-wider hover:bg-neutral-800 transition-colors duration-500"
             >
               <div className="flex items-center space-x-3">
@@ -192,15 +254,20 @@ const InlandFarmsDelivery = () => {
                   onClick={() => setSelectedProduct(product)}
                   className="group text-left border-b border-neutral-900 pb-8 hover:border-neutral-700 transition-all duration-500"
                 >
-                  <div className="bg-neutral-900 h-80 mb-6 flex items-center justify-center relative">
-                   <div className="w-full h-full overflow-hidden">
-  {product.image_url 
-    ? <img src={product.image_url} alt={product.name}className="w-full h-full object-cover object-center"/>
-    : <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
-      </svg>
-  }
-<span className="absolute top-4 left-4 text-xs tracking-wider text-white font-light bg-black/40 px-2 py-1">From Our Farm</span>                  <h3 className="text-xl font-serif text-neutral-100 mb-3">{product.name}</h3>
+                  <div className="bg-neutral-900 h-80 mb-6 relative overflow-hidden">
+                    {product.image_url
+                      ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover object-center" />
+                      : <div className="w-full h-full flex items-center justify-center">
+                          <svg className="w-20 h-20 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
+                          </svg>
+                        </div>
+                    }
+                    <span className="absolute top-3 left-3 text-xs tracking-wider text-white font-light bg-black/60 px-2 py-1">
+                      From Our Farm
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-serif text-neutral-100 mb-3">{product.name}</h3>
                   <p className="text-neutral-600 text-xs mb-4">{product.type}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl text-neutral-100 font-light">${product.price}</span>
@@ -225,18 +292,19 @@ const InlandFarmsDelivery = () => {
             </button>
 
             <div className="grid md:grid-cols-2 gap-20">
-              <div className="bg-neutral-900 h-[600px] flex items-center justify-center relative">
-                <div className="w-full h-full overflow-hidden">
-  {selectedProduct.image_url
-    ? <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover object-center" />
-    : <svg className="w-32 h-32 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
-      </svg>
-  }
-</div>
-<span className="absolute top-6 left-6 text-xs tracking-wider text-neutral-700 font-light">
-  From Our Farm
-</span>              </div>
+              <div className="h-[600px] relative overflow-hidden">
+                {selectedProduct.image_url
+                  ? <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover object-center" />
+                  : <div className="w-full h-full bg-neutral-900 flex items-center justify-center">
+                      <svg className="w-32 h-32 text-neutral-800" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C12 2 8 4 8 8C8 10 9 11 10 12C9 13 8 14 8 16C8 20 12 22 12 22C12 22 16 20 16 16C16 14 15 13 14 12C15 11 16 10 16 8C16 4 12 2 12 2Z"/>
+                      </svg>
+                    </div>
+                }
+                <span className="absolute top-6 left-6 text-xs tracking-wider text-white font-light bg-black/60 px-2 py-1">
+                  From Our Farm
+                </span>
+              </div>
 
               <div>
                 <div className="flex items-start justify-between mb-8">
@@ -248,10 +316,7 @@ const InlandFarmsDelivery = () => {
                     onClick={() => toggleFavorite(selectedProduct.id)}
                     className="text-neutral-600 hover:text-neutral-400 transition-colors"
                   >
-                    <Heart
-                      className="w-6 h-6"
-                      fill={favorites.includes(selectedProduct.id) ? "currentColor" : "none"}
-                    />
+                    <Heart className="w-6 h-6" fill={favorites.includes(selectedProduct.id) ? "currentColor" : "none"} />
                   </button>
                 </div>
 
@@ -283,89 +348,202 @@ const InlandFarmsDelivery = () => {
                   </button>
                 </div>
 
-                <p className="text-xs text-neutral-700 tracking-wide">
-                  Limited release · From our farm
-                </p>
+                <p className="text-xs text-neutral-700 tracking-wide">Limited release · From our farm</p>
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Cart Sidebar */}
+      {/* Cart / Checkout Sidebar */}
       {showCart && (
-        <div className="fixed inset-0 bg-black/90 z-50" onClick={() => setShowCart(false)}>
+        <div className="fixed inset-0 bg-black/90 z-50" onClick={() => { setShowCart(false); setShowCheckout(false); setOrderComplete(false); }}>
           <div
             className="absolute right-0 top-0 h-full w-full max-w-lg bg-neutral-950 border-l border-neutral-900 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-12">
-              <div className="flex justify-between items-center mb-16 pb-8 border-b border-neutral-900">
-                <h2 className="text-2xl font-serif text-neutral-100">Cart</h2>
-                <button onClick={() => setShowCart(false)} className="text-neutral-600 hover:text-neutral-400">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
 
-              {cart.length === 0 ? (
+              {/* Order Complete */}
+              {orderComplete && (
                 <div className="text-center py-24">
-                  <p className="text-neutral-600 font-light tracking-wide">Your cart is empty</p>
+                  <p className="text-neutral-100 font-serif text-2xl mb-4">Order Placed</p>
+                  <p className="text-neutral-500 font-light text-sm mb-8">Your order has been received. Expect discreet delivery within your selected window.</p>
+                  <button
+                    onClick={() => { setShowCart(false); setOrderComplete(false); }}
+                    className="bg-neutral-100 text-neutral-950 px-8 py-3 text-xs tracking-widest uppercase hover:bg-white transition-colors"
+                  >
+                    Continue Browsing
+                  </button>
                 </div>
-              ) : (
+              )}
+
+              {/* Checkout Form */}
+              {showCheckout && !orderComplete && (
                 <>
-                  <div className="space-y-8 mb-16">
-                    {cart.map(item => (
-                      <div key={item.id} className="pb-8 border-b border-neutral-900">
+                  <div className="flex justify-between items-center mb-12 pb-8 border-b border-neutral-900">
+                    <h2 className="text-2xl font-serif text-neutral-100">Checkout</h2>
+                    <button onClick={() => setShowCheckout(false)} className="text-neutral-600 hover:text-neutral-400 text-xs tracking-widest uppercase">← Back</button>
+                  </div>
+
+                  <div className="space-y-6 mb-12">
+                    <div>
+                      <label className="text-xs tracking-widest uppercase text-neutral-600 mb-2 block">Full Name</label>
+                      <input
+                        type="text"
+                        value={customerInfo.name}
+                        onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                        className="w-full bg-neutral-900 border border-neutral-800 text-neutral-100 px-4 py-3 text-sm focus:outline-none focus:border-neutral-600"
+                        placeholder="Your name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs tracking-widest uppercase text-neutral-600 mb-2 block">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={customerInfo.phone}
+                        onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
+                        className="w-full bg-neutral-900 border border-neutral-800 text-neutral-100 px-4 py-3 text-sm focus:outline-none focus:border-neutral-600"
+                        placeholder="Your phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs tracking-widest uppercase text-neutral-600 mb-2 block">Delivery Address</label>
+                      <input
+                        type="text"
+                        value={customerInfo.address}
+                        onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
+                        className="w-full bg-neutral-900 border border-neutral-800 text-neutral-100 px-4 py-3 text-sm focus:outline-none focus:border-neutral-600"
+                        placeholder="Full delivery address"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs tracking-widest uppercase text-neutral-600 mb-2 block">Delivery Window</label>
+                      <select
+                        value={deliveryWindow}
+                        onChange={(e) => setDeliveryWindow(e.target.value)}
+                        className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 px-4 py-3 text-sm focus:outline-none focus:border-neutral-600"
+                      >
+                        <option>Today, 2PM - 4PM</option>
+                        <option>Today, 4PM - 6PM</option>
+                        <option>Today, 6PM - 8PM</option>
+                        <option>Tomorrow, 12PM - 2PM</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs tracking-widest uppercase text-neutral-600 mb-2 block">Payment Method</label>
+                      <div className="w-full bg-neutral-900 border border-neutral-800 text-neutral-400 px-4 py-3 text-sm">
+                        Cash on Delivery
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 pt-4">
+                      <input
+                        type="checkbox"
+                        id="ageVerify"
+                        checked={customerInfo.ageVerified}
+                        onChange={(e) => setCustomerInfo({...customerInfo, ageVerified: e.target.checked})}
+                        className="mt-1"
+                      />
+                      <label htmlFor="ageVerify" className="text-xs text-neutral-500 leading-relaxed">
+                        I confirm that I am 21 years of age or older and legally eligible to purchase cannabis products in my jurisdiction.
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-neutral-900 pt-8 mb-8">
+                    <div className="flex justify-between mb-3 text-sm">
+                      <span className="text-neutral-600">Subtotal</span>
+                      <span className="text-neutral-300">${cartTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-6 text-sm">
+                      <span className="text-neutral-600">Private Delivery</span>
+                      <span className="text-neutral-300">{deliveryFee === 0 ? 'Complimentary' : '$5.00'}</span>
+                    </div>
+                    <div className="flex justify-between text-xl pt-4 border-t border-neutral-900">
+                      <span className="text-neutral-100 font-light">Total</span>
+                      <span className="text-neutral-100 font-light">${orderTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={submitOrder}
+                    disabled={submitting}
+                    className="w-full bg-neutral-100 text-neutral-950 py-5 text-sm tracking-widest uppercase hover:bg-white transition-colors duration-500 disabled:opacity-50"
+                  >
+                    {submitting ? 'Placing Order...' : 'Place Order'}
+                  </button>
+                </>
+              )}
+
+              {/* Cart View */}
+              {!showCheckout && !orderComplete && (
+                <>
+                  <div className="flex justify-between items-center mb-16 pb-8 border-b border-neutral-900">
+                    <h2 className="text-2xl font-serif text-neutral-100">Cart</h2>
+                    <button onClick={() => setShowCart(false)} className="text-neutral-600 hover:text-neutral-400">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {cart.length === 0 ? (
+                    <div className="text-center py-24">
+                      <p className="text-neutral-600 font-light tracking-wide">Your cart is empty</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-8 mb-16">
+                        {cart.map(item => (
+                          <div key={item.id} className="pb-8 border-b border-neutral-900">
+                            <div className="flex justify-between mb-4">
+                              <div>
+                                <h4 className="text-neutral-100 font-light mb-2">{item.name}</h4>
+                                <p className="text-sm text-neutral-600">{item.weight}</p>
+                              </div>
+                              <button onClick={() => removeFromCart(item.id)} className="text-neutral-700 hover:text-neutral-500">
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center space-x-4">
+                                <button onClick={() => updateQuantity(item.id, -1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">−</button>
+                                <span className="text-neutral-300 font-light">{item.quantity}</span>
+                                <button onClick={() => updateQuantity(item.id, 1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">+</button>
+                              </div>
+                              <span className="text-neutral-100 font-light">${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="border-t border-neutral-900 pt-8 mb-12">
                         <div className="flex justify-between mb-4">
-                          <div>
-                            <h4 className="text-neutral-100 font-light mb-2">{item.name}</h4>
-                            <p className="text-sm text-neutral-600">{item.weight}</p>
-                          </div>
-                          <button onClick={() => removeFromCart(item.id)} className="text-neutral-700 hover:text-neutral-500">
-                            <X className="w-4 h-4" />
-                          </button>
+                          <span className="text-neutral-600 text-sm tracking-wide">Subtotal</span>
+                          <span className="text-neutral-300 font-light">${cartTotal.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center space-x-4">
-                            <button onClick={() => updateQuantity(item.id, -1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">−</button>
-                            <span className="text-neutral-300 font-light">{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.id, 1)} className="w-8 h-8 border border-neutral-800 flex items-center justify-center hover:border-neutral-700 text-neutral-400">+</button>
-                          </div>
-                          <span className="text-neutral-100 font-light">${(item.price * item.quantity).toFixed(2)}</span>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-neutral-600 text-sm tracking-wide">Private Delivery</span>
+                          <span className="text-neutral-300 font-light">{deliveryFee === 0 ? 'Complimentary' : '$5.00'}</span>
+                        </div>
+                        <p className="text-xs text-neutral-700 mb-8">Discreet. Unbranded. Farm-direct.</p>
+                        <div className="flex justify-between text-xl pt-8 border-t border-neutral-900">
+                          <span className="text-neutral-100 font-light">Total</span>
+                          <span className="text-neutral-100 font-light">${orderTotal.toFixed(2)}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
 
-                  <div className="border-t border-neutral-900 pt-8 mb-12">
-                    <div className="flex justify-between mb-4">
-                      <span className="text-neutral-600 text-sm tracking-wide">Subtotal</span>
-                      <span className="text-neutral-300 font-light">${cartTotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-neutral-600 text-sm tracking-wide">Private Delivery</span>
-                      <span className="text-neutral-300 font-light">{cartTotal >= 50 ? 'Complimentary' : '$5.00'}</span>
-                    </div>
-                    <p className="text-xs text-neutral-700 mb-8">Discreet. Unbranded. Farm-direct.</p>
-                    <div className="flex justify-between text-xl pt-8 border-t border-neutral-900">
-                      <span className="text-neutral-100 font-light">Total</span>
-                      <span className="text-neutral-100 font-light">${(cartTotal + (cartTotal >= 50 ? 0 : 5)).toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="mb-8">
-                    <label className="text-xs tracking-widest uppercase text-neutral-600 mb-3 block">Delivery Window</label>
-                    <select className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 px-4 py-3 text-sm focus:outline-none focus:border-neutral-700">
-                      <option>Today, 2PM - 4PM</option>
-                      <option>Today, 4PM - 6PM</option>
-                      <option>Today, 6PM - 8PM</option>
-                      <option>Tomorrow, 12PM - 2PM</option>
-                    </select>
-                  </div>
-
-                  <button className="w-full bg-neutral-100 text-neutral-950 py-5 text-sm tracking-widest uppercase hover:bg-white transition-colors duration-500">
-                    Complete Order
-                  </button>
+                      <button
+                        onClick={() => setShowCheckout(true)}
+                        className="w-full bg-neutral-100 text-neutral-950 py-5 text-sm tracking-widest uppercase hover:bg-white transition-colors duration-500"
+                      >
+                        Proceed to Checkout
+                      </button>
+                    </>
+                  )}
                 </>
               )}
             </div>
