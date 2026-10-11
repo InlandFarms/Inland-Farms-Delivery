@@ -11,6 +11,8 @@ const InlandFarmsDelivery = () => {
   const [favorites, setFavorites] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [ageVerified, setAgeVerified] = useState(false);
+  const [ageDenied, setAgeDenied] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -102,10 +104,6 @@ const InlandFarmsDelivery = () => {
       alert('Please fill in all fields.');
       return;
     }
-    if (!customerInfo.ageVerified) {
-      alert('You must confirm you are 21 or older.');
-      return;
-    }
     setSubmitting(true);
     try {
       const orderItems = cart.map(item => ({
@@ -130,7 +128,7 @@ const InlandFarmsDelivery = () => {
           delivery_window: deliveryWindow,
           items: orderItems,
           total: orderTotal,
-          age_verified: customerInfo.ageVerified,
+          age_verified: true,
           status: 'pending'
         })
       });
@@ -138,7 +136,7 @@ const InlandFarmsDelivery = () => {
         setOrderComplete(true);
         setCart([]);
         setShowCheckout(false);
-        setCustomerInfo({ name: '', phone: '', address: '', ageVerified: false });
+        setCustomerInfo({ name: '', phone: '', address: '' });
       } else {
         alert('There was an issue placing your order. Please try again.');
       }
@@ -151,6 +149,43 @@ const InlandFarmsDelivery = () => {
 
   return (
     <div className="min-h-screen bg-neutral-950">
+
+      {/* Age Gate */}
+      {!ageVerified && !ageDenied && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center px-8">
+          <div className="text-center max-w-md">
+            <h1 className="text-4xl font-serif text-neutral-100 mb-2">INLAND FARMS</h1>
+            <p className="text-xs tracking-widest text-neutral-600 uppercase mb-16">The Delivery</p>
+            <p className="text-neutral-400 font-light mb-2 tracking-wide">You must be 21 years of age or older</p>
+            <p className="text-neutral-600 text-xs mb-12 tracking-wide">to enter this site.</p>
+            <div className="flex space-x-4 justify-center">
+              <button
+                onClick={() => setAgeVerified(true)}
+                className="bg-neutral-100 text-neutral-950 px-10 py-4 text-xs tracking-widest uppercase hover:bg-white transition-colors duration-500"
+              >
+                Yes, I'm 21+
+              </button>
+              <button
+                onClick={() => setAgeDenied(true)}
+                className="border border-neutral-800 text-neutral-500 px-10 py-4 text-xs tracking-widest uppercase hover:border-neutral-700 transition-colors duration-500"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Age Denied */}
+      {ageDenied && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center px-8">
+          <div className="text-center max-w-md">
+            <h1 className="text-4xl font-serif text-neutral-100 mb-8">INLAND FARMS</h1>
+            <p className="text-neutral-500 font-light tracking-wide">You must be 21 or older to access this site.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-neutral-900">
         <div className="max-w-7xl mx-auto px-8 py-8">
@@ -439,19 +474,6 @@ const InlandFarmsDelivery = () => {
                       <div className="w-full bg-neutral-900 border border-neutral-800 text-neutral-400 px-4 py-3 text-sm">
                         Cash on Delivery
                       </div>
-                    </div>
-
-                    <div className="flex items-start space-x-3 pt-4">
-                      <input
-                        type="checkbox"
-                        id="ageVerify"
-                        checked={customerInfo.ageVerified}
-                        onChange={(e) => setCustomerInfo({...customerInfo, ageVerified: e.target.checked})}
-                        className="mt-1"
-                      />
-                      <label htmlFor="ageVerify" className="text-xs text-neutral-500 leading-relaxed">
-                        I confirm that I am 21 years of age or older and legally eligible to purchase cannabis products in my jurisdiction.
-                      </label>
                     </div>
                   </div>
 
